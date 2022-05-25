@@ -18,23 +18,30 @@ class GUI:
         self.Window = Tk()
         self.Window.withdraw()
 
+        # login window
         self.login = Toplevel()
 
+        # set the title
         self.login.title("Login")
         self.login.resizable(width=False, height=False)
         self.login.configure(width=400, height=300)
 
+        # create a Label
         self.pls = Label(self.login, text="What should I call you?", justify=CENTER, font="Helvetica 14 bold")
         self.pls.place(relheight=0.15, relx=0.2, rely=0.07)
 
+        # create a Label
         self.labelName = Label(self.login, text="Name: ", font="Helvetica 12")
         self.labelName.place(relheight=0.2, relx=0.1, rely=0.2)
 
+        # create a entry box for  tyoing the message
         self.entryName = Entry(self.login, font="Helvetica 14")
         self.entryName.place(relwidth=0.4, relheight=0.12, relx=0.35, rely=0.2)
 
+        # set the focus of the cursor
         self.entryName.focus()
 
+        # create a Continue Button along with action
         self.go = Button(self.login, text="Next", font="Helvetica 14 bold",
                          command=lambda: self.goAhead(self.entryName.get()))
         self.go.place(relx=0.4, rely=0.55)
@@ -44,6 +51,7 @@ class GUI:
         self.login.destroy()
         self.layout(name)
 
+    # The main layout of the chat
     def layout(self, name):
         # avatar
         # image = Image.open('face.png')
@@ -54,6 +62,7 @@ class GUI:
 
         self.name = name
 
+        # to show chat window
         self.Window.deiconify()
         self.Window.title("Varothex")
         self.Window.resizable(width=False, height=False)
@@ -70,22 +79,27 @@ class GUI:
         self.labelBottom.place(relwidth=1, rely=0.825)
         self.entryMsg = Entry(self.labelBottom, bg="#2C3E50", fg="#EAECEE", font="Helvetica 13")
 
+        # place the given widget into the gui window
         self.entryMsg.place(relwidth=0.74, relheight=0.06, rely=0.008, relx=0.011)
         self.entryMsg.focus()
 
+        # create a Send Button
         self.buttonMsg = Button(self.labelBottom, text="Send", font="Helvetica 10 bold", width=20, bg="#ABB2B9",
                                 command=lambda: self.sendButton(self.entryMsg.get()))
         self.buttonMsg.place(relx=0.77, rely=0.008, relheight=0.06, relwidth=0.22)
         self.textCons.config(cursor="arrow")
 
+        # create a scroll bar
         scrollbar = Scrollbar(self.textCons)
 
+        # place the scroll bar into the gui window
         scrollbar.place(relheight=1, relx=0.974)
         scrollbar.config(command=self.textCons.yview)
         self.textCons.config(state=DISABLED)
 
         self.greet()
 
+    # function to basically start the thread for sending messages
     def sendButton(self, msg):
         self.textCons.config(state=DISABLED)
         self.msg = msg
@@ -102,6 +116,7 @@ class GUI:
         self.textCons.config(state=DISABLED)
         self.textCons.see(END)
 
+    # function to send messages
     def sendMessage(self):
         self.textCons.config(state=DISABLED)
         while True:
@@ -128,12 +143,13 @@ f = open('C:\\Users\\mihai\\Desktop\\Serios\\Projects\\Python\\Bot\\robot.txt', 
 raw = f.read()
 raw = raw.lower()
 
-sent_tokens = nltk.sent_tokenize(raw)
-word_tokens = nltk.word_tokenize(raw)
+sent_tokens = nltk.sent_tokenize(raw)  # converts to list of scentences
+word_tokens = nltk.word_tokenize(raw)  # converts to list of words
 
 sentToken = sent_tokens[:4]
 wordToken = word_tokens[:4]
 
+# preprocessing
 lemmer = nltk.stem.WordNetLemmatizer()
 
 
@@ -148,6 +164,7 @@ def LemNormalize(text):
     return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
 
 
+# Greetings
 GREETING_INPUTS = ("hello", "hi", "greetings", "sup", "what's up", "hey")
 GREETING_RESPONSES = ["Hi!", "Hey!", "*nods*", "Hello there!", "Hello!"]
 
@@ -181,13 +198,20 @@ def bot_response(user_response):
     user_response = user_response.lower()
     if user_response != 'bye':
         if user_response.lower() == 'thanks' or user_response == 'thank you':
+            # print("Varothex: You're welcome!")
             return "Varothex: You're welcome!"
         else:
             if greeting(user_response) is not None:
+                # print("Varothex: " + greeting(user_response))
                 return "Varothex: " + greeting(user_response)
             else:
+                # print("Varothex: ", end='')
+                # print(response(user_response))
+                # sent_tokens.remove(user_response)
                 return "Varothex: " + response(user_response)
+                # sent_tokens.remove(user_response)
     else:
+        # print("Varothex: Bye!")
         return "Varothex: Bye!"
 
 
