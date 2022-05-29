@@ -1,27 +1,16 @@
 import socket
 import threading
 from tkinter import *
-import nltk
-# nltk.download('punkt')
-# nltk.download('wordnet')
-# nltk.download('omw-1.4')
-import random
-import string
-import warnings
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from PIL import Image, ImageTk
 import warnings
-import pickle
 import nltk
-# nltk.download('punkt')
 from nltk.stem.lancaster import LancasterStemmer
 import numpy as np
 import tflearn
-import tensorflow as tf
 import random
 import json
 from tensorflow.python.framework import ops
+import pickle
 
 
 class GUI:
@@ -38,23 +27,24 @@ class GUI:
         self.login.configure(width=400, height=300)
 
         # create a Label
-        self.pls = Label(self.login, text="What should I call you?", justify=CENTER, font="Helvetica 14 bold")
+        self.pls = Label(self.login, text="What should I call you?", justify=CENTER, font="Roboto 14 bold")
         self.pls.place(relheight=0.15, relx=0.2, rely=0.07)
 
         # create a Label
-        self.labelName = Label(self.login, text="Name: ", font="Helvetica 12")
+        self.labelName = Label(self.login, text="Name: ", font="Roboto 12")
         self.labelName.place(relheight=0.2, relx=0.1, rely=0.2)
 
-        # create a entry box for  tyoing the message
-        self.entryName = Entry(self.login, font="Helvetica 14")
+        # create a entry box for tyoing the message
+        self.entryName = Entry(self.login, font="Roboto 14")
         self.entryName.place(relwidth=0.4, relheight=0.12, relx=0.35, rely=0.2)
 
         # set the focus of the cursor
         self.entryName.focus()
 
         # create a Continue Button along with action
-        self.go = Button(self.login, text="Next", font="Helvetica 14 bold",
+        self.go = Button(self.login, text="Next", font="Roboto 14 bold",
                          command=lambda: self.goAhead(self.entryName.get()))
+        self.login.bind('<Return>', lambda event: self.goAhead(self.entryName.get()))
         self.go.place(relx=0.4, rely=0.55)
         self.Window.mainloop()
 
@@ -64,88 +54,85 @@ class GUI:
 
     # The main layout of the chat
     def layout(self, name):
-        # avatar
-        # image = Image.open('face.png')
-        # image.thumbnail((300, 300), Image.ANTIALIAS)
-        # photo = ImageTk.PhotoImage(image)
-        # label_image = tkinter.Label(image=photo)
-        # label_image.grid(column=1, row=0)
-
         self.name = name
 
-        # to show chat window
         self.Window.deiconify()
         self.Window.title("Varothex")
         self.Window.resizable(width=False, height=False)
-        self.Window.configure(width=470, height=550, bg="#17202A")
-        self.labelHead = Label(self.Window, bg="#17202A", fg="#EAECEE", text=self.name, font="Helvetica 13 bold",
-                               pady=5)
-        self.labelHead.place(relwidth=1)
+        self.Window.configure(width=1200, height=700, bg="#17202A")
+
+        self.labelHead = Label(self.Window, bg="#17202A", fg="#EAECEE", text="avatar", font="Roboto 13 bold", pady=5)
+        self.labelHead.place(relwidth=1, relheight=0.19)
+
+        # TODO avatar
+
         self.line = Label(self.Window, width=450, bg="#ABB2B9")
-        self.line.place(relwidth=1, rely=0.07, relheight=0.012)
-        self.textCons = Text(self.Window, width=20, height=2, bg="#17202A", fg="#EAECEE", font="Helvetica 14", padx=5,
+        self.line.place(relwidth=1, rely=0.19, relheight=0.012)
+
+        # chat window
+        self.chatWindow = Text(self.Window, width=20, height=2, bg="#17202A", fg="#EAECEE", font="Roboto 14", padx=5,
                              pady=5)
-        self.textCons.place(relheight=0.745, relwidth=1, rely=0.08)
+        self.chatWindow.place(relheight=0.625, relwidth=0.985, rely=0.2)
+
         self.labelBottom = Label(self.Window, bg="#ABB2B9", height=80)
         self.labelBottom.place(relwidth=1, rely=0.825)
-        self.entryMsg = Entry(self.labelBottom, bg="#2C3E50", fg="#EAECEE", font="Helvetica 13")
 
-        # place the given widget into the gui window
-        self.entryMsg.place(relwidth=0.74, relheight=0.06, rely=0.008, relx=0.011)
-        self.entryMsg.focus()
+        # textbox
+        self.textbox = Entry(self.labelBottom, bg="#2C3E50", fg="#EAECEE", font="Roboto 13")
+        self.textbox.place(relwidth=0.74, relheight=0.06, relx=0.011, rely=0.008)
+        self.textbox.focus()
 
-        # create a Send Button
-        self.buttonMsg = Button(self.labelBottom, text="Send", font="Helvetica 10 bold", width=20, bg="#ABB2B9",
-                                command=lambda: self.sendButton(self.entryMsg.get()))
+        # send button
+        self.buttonMsg = Button(self.labelBottom, text="Send", font="Roboto 14 bold", width=20, bg="#ABB2B9",
+                                command=lambda: self.sendButton(self.textbox.get()))
+        self.Window.bind('<Return>', lambda event: self.sendButton(self.textbox.get()))
         self.buttonMsg.place(relx=0.77, rely=0.008, relheight=0.06, relwidth=0.22)
-        self.textCons.config(cursor="arrow")
+        self.chatWindow.config(cursor="arrow")
 
-        # create a scroll bar
-        scrollbar = Scrollbar(self.textCons)
-
-        # place the scroll bar into the gui window
-        scrollbar.place(relheight=1, relx=0.974)
-        scrollbar.config(command=self.textCons.yview)
-        self.textCons.config(state=DISABLED)
+        # scroll bar
+        scrollbar = Scrollbar(self.Window)
+        scrollbar.place(relheight=0.625, relx=0.985, rely=0.2)
+        scrollbar.config(command=self.chatWindow.yview)
+        self.chatWindow.config(state=DISABLED)
 
         self.greet()
 
     # function to basically start the thread for sending messages
     def sendButton(self, msg):
-        self.textCons.config(state=DISABLED)
+        self.chatWindow.config(state=DISABLED)
         self.msg = msg
-        self.entryMsg.delete(0, END)
+        self.textbox.delete(0, END)
         snd = threading.Thread(target=self.sendMessage)
         snd.start()
 
     def greet(self):
-        self.textCons.config(state=DISABLED)
-        message = "Varothex: Hello there, my name is Varothex. I'm here for you! If you want to exit, " \
-                  "type „bye”! "
-        self.textCons.config(state=NORMAL)
-        self.textCons.insert(END, message + "\n\n")
-        self.textCons.config(state=DISABLED)
-        self.textCons.see(END)
+        self.chatWindow.config(state=DISABLED)
+        message = "Varothex: Hello there, my name is Varothex. I'm here for you!"
+        self.chatWindow.config(state=NORMAL)
+        self.chatWindow.insert(END, message + "\n\n")
+        self.chatWindow.config(state=DISABLED)
+        self.chatWindow.see(END)
 
     # function to send messages
     def sendMessage(self):
-        self.textCons.config(state=DISABLED)
+        self.chatWindow.config(state=DISABLED)
         while True:
             message = f"{self.name}: {self.msg}"
-            self.textCons.config(state=NORMAL)
-            self.textCons.insert(END, message + "\n\n")
-            self.textCons.config(state=DISABLED)
-            self.textCons.see(END)
-            self.send()
+            self.chatWindow.config(state=NORMAL)
+            self.chatWindow.insert(END, message + "\n\n")
+            self.chatWindow.config(state=DISABLED)
+            self.chatWindow.see(END)
+            self.botAnswer()
             break
 
-    def send(self):
-        self.textCons.config(state=DISABLED)
-        message = "Varothex: " + response(self.msg)                                # afisam raspunsul
-        self.textCons.config(state=NORMAL)
-        self.textCons.insert(END, message + "\n\n")
-        self.textCons.config(state=DISABLED)
-        self.textCons.see(END)
+    # return the bot answer
+    def botAnswer(self):
+        self.chatWindow.config(state=DISABLED)
+        message = "Varothex: " + response(self.msg)
+        self.chatWindow.config(state=NORMAL)
+        self.chatWindow.insert(END, message + "\n\n")
+        self.chatWindow.config(state=DISABLED)
+        self.chatWindow.see(END)
 
 
 warnings.filterwarnings('ignore')
@@ -157,7 +144,7 @@ with open('intents.json') as json_data:
 words = []
 classes = []
 documents = []
-ignore_words = ['?', "'m", "'re", "'s", ')', ',', '.', ':']  # eventual aici putem defini o lista de STOPWORDS
+ignore_words = ['?', "'m", "'re", "'s", ')', ',', '.', ':']  # STOPWORDS
 
 # pentru fiecare fraza din sabloanele corespunzatoare unei intentii
 for intent in intents['intents']:
@@ -216,19 +203,17 @@ ops.reset_default_graph()  # resetam starea engine-ului TensorFlow
 # definim reteaua
 net = tflearn.input_data(shape=[None, len(train_x[0])])  # toti vectorii de bag-of-words au aceasta dimensiune
 net = tflearn.fully_connected(net, 8)  # strat feed-forward ascuns cu 8 noduri
-net = tflearn.fully_connected(net, 8)  # strat feed-forward ascuns cu 8 noduri
+# net = tflearn.fully_connected(net, 8)  # strat feed-forward ascuns cu 8 noduri
 net = tflearn.fully_connected(net, len(train_y[0]), activation='softmax')  # numarul de noduri output = numarul de clase
 net = tflearn.regression(net)  # folosim acest strat de logistic regression pentru a extrage probabilitatile claselor
 
 # definim modelul final
 model = tflearn.DNN(net, tensorboard_dir='tflearn_logs')
 
-# incepem antrenarea folosind coborarea pe gradient
-# trecem prin model cate 8 fraze odata (batch size = 8)
-model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True)
+# incepem antrenarea folosind coborarea pe gradient, trecem prin model cate 8 fraze odata (batch size = 8)
+model.fit(train_x, train_y, n_epoch=1200, batch_size=8, show_metric=True)
 model.save('model.tflearn')
 
-import pickle
 pickle.dump({'words': words, 'classes': classes, 'train_x': train_x, 'train_y': train_y}, open("training_data", "wb"))
 
 data = pickle.load(open("training_data", "rb"))
@@ -284,7 +269,12 @@ def classify(sentence):
 
 
 def response(sentence):
+    # TODO empty messages
+    # if sentence == "":
+    #     return "Did you say something?"
+
     results = classify(sentence)
+
     # daca avem macar o intentie valida, o procesam pe cea cu probabilitate maxima
     if results:
         while results:
@@ -296,45 +286,10 @@ def response(sentence):
 
             results.pop(0)
             # daca nu am putut da un raspuns pentru aceasta intentie, trecem la urmatoarea cu probabilitate maxima
-
-    return "Sorry, I don't understand."  # nu a putut fi stabilita o intentie pentru
-    # fraza introdusa
-
-
-# structura de date pentru context
-context = {}
-
-
-# retinem pentru un user contextul curent, in functie de un ID specific
-def response(sentence, userID='123', show_details=False):
-    results = classify(sentence)
-    # daca avem macar o intentie valida, o procesam pe cea cu probabilitate maxima
-    if results:
-        # loop as long as there are matches to process
-        while results:
-            for i in intents['intents']:
-                # cautam in dictionarul de intentii tagul returnat
-                if i['tag'] == results[0][0]:
-                    # daca intentia curenta asteapta un context pentru a fi valida, verificam ca contextul actual sa
-                    # fie indeplinit
-                    if ('context_filter' not in i
-                            or (userID in context and 'context_filter' in i and i['context_filter'] == context[
-                                userID])):
-                        if show_details:
-                            print('tag:', i['tag'])
-                        # daca intentia curenta actualizeaza contextul
-                        if 'context_set' in i:
-                            if show_details:
-                                print('context:', i['context_set'])
-                            context[userID] = i['context_set']
-                        # returnam un raspuns aleator corespunzator intentiei
-                        return random.choice(i['responses'])
-            results.pop(0)
-            # daca nu am putut da un raspuns pentru aceasta intentie, trecem la urmatoarea cu probabilitate maxima
     # else:
         # folosim vechiul cod
 
-    return "Sorry, I wasn't trained about this subject."  # nu a putut fi stabilita o intentie pentru fraza introdusa
+    return "Sorry, I don't understand."  # nu a putut fi stabilita o intentie pentru fraza introdusa
 
 
 if __name__ == "__main__":

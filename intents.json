@@ -2,45 +2,45 @@
   [
         {"tag": "greeting",
          "patterns": ["Hi", "Hello", "Good day"],
-         "responses": ["Hello, how are you today?", "Good to see you again. How are you?", "Hi there, how are you?"],
+         "responses": ["Hello, how are you today?", "Good to see you again. How are you?", "Hi there, how are you?", "Hello there, what's up?"],
          "context_set": "howareyou"
         },
 
 		{"tag": "greeting_good",
          "patterns": ["I'm fine", "I'm pretty good", "I'm happy"],
-         "responses": ["I'm very happy to hear that!", "Yay, thats's great news!"],
+         "responses": ["I'm very happy to hear that! :)", "Yay, thats's great news! :)"],
          "context_filter": "howareyou"
         },
 
         {"tag": "question",
          "patterns": ["How are you", "What's up?"],
-         "responses": ["I'm very happy!", "Sir, I'm a bot. Of course I feel great!"]
+         "responses": ["I'm very happy! :)", "I'm a bot. Of course I feel great! ;)"]
         },
 
 		{"tag": "greeting_bad",
-         "patterns": ["Not so good", "I'm not feeling myself today", "I am sadder than ever.", "I feel sad", "I am sad"],
+         "patterns": ["Not so good", "I'm not feeling myself today", "I am sadder than ever.", "I feel sad", "I am sad", ":("],
          "responses": ["Oh, I know jokes to make you feel better.", "Do you want me to tell you a joke to feel better?"],
          "context_filter": "howareyou"
         },
 
 		{"tag": "joke",
-         "patterns": ["ok, tell me a joke", "tell me a joke", "do you know any jokes", "please tell me a joke"],
+         "patterns": ["ok, tell me a joke", "tell me a joke", "do you know any jokes", "please tell me a joke", "joke"],
          "responses": ["What did the wall tell to the other? See you at the corner!", "When Chuck Norris cuts an onion, he doesn't cry, the onion cries!"]
         },
 
         {"tag": "goodbye",
          "patterns": ["Bye", "See you later", "Goodbye"],
-         "responses": ["See you later", "Have a nice day", "Bye! Come back again soon."]
+         "responses": ["See you later!", "Have a nice day!", "Bye! Come back again soon."]
         },
 
         {"tag": "thanks",
          "patterns": ["Thanks", "Thank you", "That's helpful"],
-         "responses": ["Happy to help!", "Any time!", "My pleasure"]
+         "responses": ["Happy to help!", "Any time!", "My pleasure!"]
         },
 
         {"tag": "funny",
-         "patterns": ["hahaha", "that was funny", ":))" ],
-         "responses": ["Glad I made you smile", "Happy to make you smile"]
+         "patterns": ["hahaha", "that was funny", ":)" ],
+         "responses": ["Glad I made you smile! :)", "Happy to make you smile! :)"]
         },
 
         {"tag": "quote",
@@ -50,7 +50,7 @@
 
         {"tag": "name",
          "patterns": ["What is your name?", "What's your name?", "Who are you?" ],
-         "responses": ["I am Chatty, your beloved chatbot."]
+         "responses": ["I am Varothex!", "My name is Varothex!"]
         },
 
         {"tag": "therapy",
