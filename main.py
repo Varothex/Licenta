@@ -1,9 +1,8 @@
-import socket
 import threading
 from tkinter import *
-from PIL import Image, ImageTk
 import warnings
 import nltk
+from django.utils.datetime_safe import datetime
 from nltk.stem.lancaster import LancasterStemmer
 import numpy as np
 import tflearn
@@ -11,6 +10,9 @@ import random
 import json
 from tensorflow.python.framework import ops
 import pickle
+from gtts import gTTS
+import os
+from pygame import mixer
 
 
 class GUI:
@@ -60,40 +62,42 @@ class GUI:
         self.Window.title("Varothex")
         self.Window.resizable(width=False, height=False)
         self.Window.configure(width=1200, height=700, bg="#17202A")
+        width = 0.7
 
-        self.labelHead = Label(self.Window, bg="#17202A", fg="#EAECEE", text="avatar", font="Roboto 13 bold", pady=5)
-        self.labelHead.place(relwidth=1, relheight=0.19)
-
-        # TODO avatar
-
-        self.line = Label(self.Window, width=450, bg="#ABB2B9")
-        self.line.place(relwidth=1, rely=0.19, relheight=0.012)
+        # avatar
+        avatarFrame = Frame(self.Window)
+        avatarFrame.pack()
+        avatarFrame.place(relx=width, rely=0)
+        avatar = PhotoImage(file='avatar.png')
+        self.avatar = avatar  # You always need a reference to the image or it gets garbage collected
+        Label(avatarFrame, image=avatar).grid()
 
         # chat window
         self.chatWindow = Text(self.Window, width=20, height=2, bg="#17202A", fg="#EAECEE", font="Roboto 14", padx=5,
-                             pady=5)
-        self.chatWindow.place(relheight=0.625, relwidth=0.985, rely=0.2)
+                               pady=5)
+        self.chatWindow.place(relheight=0.825, relwidth=width)
 
+        # scroll bar
+        scrollbar = Scrollbar(self.Window)
+        scrollbar.place(relheight=0.825, relx=width)
+        scrollbar.config(command=self.chatWindow.yview)
+        self.chatWindow.config(state=DISABLED)
+
+        # bottom
         self.labelBottom = Label(self.Window, bg="#ABB2B9", height=80)
         self.labelBottom.place(relwidth=1, rely=0.825)
 
         # textbox
         self.textbox = Entry(self.labelBottom, bg="#2C3E50", fg="#EAECEE", font="Roboto 13")
-        self.textbox.place(relwidth=0.74, relheight=0.06, relx=0.011, rely=0.008)
+        self.textbox.place(relwidth=0.68, relheight=0.06, relx=0.01, rely=0.015)
         self.textbox.focus()
 
         # send button
         self.buttonMsg = Button(self.labelBottom, text="Send", font="Roboto 14 bold", width=20, bg="#ABB2B9",
                                 command=lambda: self.sendButton(self.textbox.get()))
         self.Window.bind('<Return>', lambda event: self.sendButton(self.textbox.get()))
-        self.buttonMsg.place(relx=0.77, rely=0.008, relheight=0.06, relwidth=0.22)
+        self.buttonMsg.place(relx=0.745, rely=0.015, relheight=0.06, relwidth=0.22)
         self.chatWindow.config(cursor="arrow")
-
-        # scroll bar
-        scrollbar = Scrollbar(self.Window)
-        scrollbar.place(relheight=0.625, relx=0.985, rely=0.2)
-        scrollbar.config(command=self.chatWindow.yview)
-        self.chatWindow.config(state=DISABLED)
 
         self.greet()
 
@@ -108,6 +112,12 @@ class GUI:
     def greet(self):
         self.chatWindow.config(state=DISABLED)
         message = "Varothex: Hello there, my name is Varothex. I'm here for you!"
+        # myobj = gTTS(text="Hello there, my name is Varothex. I'm here for you!", lang='en', slow=False)
+        # myobj.save("welcome.mp3")
+        welcome = 'welcome.mp3'
+        mixer.init()
+        mixer.music.load(welcome)
+        mixer.music.play()
         self.chatWindow.config(state=NORMAL)
         self.chatWindow.insert(END, message + "\n\n")
         self.chatWindow.config(state=DISABLED)
@@ -211,7 +221,7 @@ net = tflearn.regression(net)  # folosim acest strat de logistic regression pent
 model = tflearn.DNN(net, tensorboard_dir='tflearn_logs')
 
 # incepem antrenarea folosind coborarea pe gradient, trecem prin model cate 8 fraze odata (batch size = 8)
-model.fit(train_x, train_y, n_epoch=1200, batch_size=8, show_metric=True)
+model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True)
 model.save('model.tflearn')
 
 pickle.dump({'words': words, 'classes': classes, 'train_x': train_x, 'train_y': train_y}, open("training_data", "wb"))
@@ -251,7 +261,7 @@ def bow(sentence, words):
     return np.array(bag)
 
 
-ERROR_THRESHOLD = 0.25
+ERROR_THRESHOLD = 0.4
 
 
 def classify(sentence):
@@ -268,11 +278,11 @@ def classify(sentence):
     return return_list
 
 
-def response(sentence):
-    # TODO empty messages
-    # if sentence == "":
-    #     return "Did you say something?"
+# structura de date pentru context
+context = {}
 
+
+def response(sentence, userID='123', show_details=False):
     results = classify(sentence)
 
     # daca avem macar o intentie valida, o procesam pe cea cu probabilitate maxima
@@ -281,16 +291,35 @@ def response(sentence):
             for i in intents['intents']:
                 # cautam in dictionarul de intentii tagul returnat
                 if i['tag'] == results[0][0]:
-                    # returnam un raspuns aleator corespunzator intentiei
-                    return random.choice(i['responses'])
+                    if ('context_filter' not in i or
+                            (userID in context and 'context_filter' in i and i['context_filter'] == context[userID])):
+                        # daca intentia curenta actualizeaza contextul
+                        if 'context_set' in i:
+                            context[userID] = i['context_set']
+                        # returnam un raspuns aleator corespunzator intentiei
+                        botResponse = random.choice(i['responses'])
+                        tts = gTTS(text=botResponse, lang='en', slow=False)
+                        date_string = datetime.now().strftime("%d%m%Y%H%M%S")
+                        ttsResponse = "tts."+date_string+".mp3"
+                        tts.save('tts/' + ttsResponse)
+                        mixer.music.load('tts/' + ttsResponse)
+                        mixer.music.play()
+                        return botResponse
 
             results.pop(0)
             # daca nu am putut da un raspuns pentru aceasta intentie, trecem la urmatoarea cu probabilitate maxima
-    # else:
-        # folosim vechiul cod
 
-    return "Sorry, I don't understand."  # nu a putut fi stabilita o intentie pentru fraza introdusa
+    # myobj = gTTS(text="Sorry, I can't understand you. :(", lang='en', slow=False)
+    # myobj.save("notUnderstand.mp3")
+    notUnderstand = 'notUnderstand.mp3'
+    mixer.music.load(notUnderstand)
+    mixer.music.play()
+    return "Sorry, I can't understand you. :("  # nu a putut fi stabilita o intentie pentru fraza introdusa
 
 
 if __name__ == "__main__":
+    # we remove any previous tts files
+    directory = 'tts/'
+    for f in os.listdir(directory):
+        os.remove(os.path.join(directory, f))
     g = GUI()
