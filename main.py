@@ -13,6 +13,11 @@ import pickle
 from gtts import gTTS
 import os
 from pygame import mixer
+import requests
+import bs4
+from time import *
+# import PyAudio
+import speech_recognition as sr
 
 
 class GUI:
@@ -48,9 +53,12 @@ class GUI:
                          command=lambda: self.goAhead(self.entryName.get()))
         self.login.bind('<Return>', lambda event: self.goAhead(self.entryName.get()))
         self.go.place(relx=0.4, rely=0.55)
+
         self.Window.mainloop()
 
     def goAhead(self, name):
+        if name == "":
+            name = "GUEST"
         self.login.destroy()
         self.layout(name)
 
@@ -65,12 +73,12 @@ class GUI:
         width = 0.7
 
         # avatar
-        avatarFrame = Frame(self.Window)
-        avatarFrame.pack()
-        avatarFrame.place(relx=width, rely=0)
+        self.avatarFrame = Frame(self.Window)
+        self.avatarFrame.pack()
+        self.avatarFrame.place(relx=width, rely=0)
         avatar = PhotoImage(file='avatar.png')
         self.avatar = avatar  # You always need a reference to the image or it gets garbage collected
-        Label(avatarFrame, image=avatar).grid()
+        Label(self.avatarFrame, image=avatar).grid()
 
         # chat window
         self.chatWindow = Text(self.Window, width=20, height=2, bg="#17202A", fg="#EAECEE", font="Roboto 14", padx=5,
@@ -111,7 +119,8 @@ class GUI:
 
     def greet(self):
         self.chatWindow.config(state=DISABLED)
-        message = "Varothex: Hello there, my name is Varothex. I'm here for you!"
+        time = strftime('%H:%M')
+        message = time + " Varothex: Hello there, my name is Varothex. I'm here for you!"
         # myobj = gTTS(text="Hello there, my name is Varothex. I'm here for you!", lang='en', slow=False)
         # myobj.save("welcome.mp3")
         welcome = 'welcome.mp3'
@@ -127,7 +136,8 @@ class GUI:
     def sendMessage(self):
         self.chatWindow.config(state=DISABLED)
         while True:
-            message = f"{self.name}: {self.msg}"
+            time = strftime('%H:%M')
+            message = time + f" {self.name}: {self.msg}"
             self.chatWindow.config(state=NORMAL)
             self.chatWindow.insert(END, message + "\n\n")
             self.chatWindow.config(state=DISABLED)
@@ -138,11 +148,31 @@ class GUI:
     # return the bot answer
     def botAnswer(self):
         self.chatWindow.config(state=DISABLED)
-        message = "Varothex: " + response(self.msg)
+        time = strftime('%H:%M')
+        message = time + " Varothex: " + response(self.msg)
         self.chatWindow.config(state=NORMAL)
         self.chatWindow.insert(END, message + "\n\n")
         self.chatWindow.config(state=DISABLED)
         self.chatWindow.see(END)
+
+        # TODO animation
+        # avatar = PhotoImage(file='avatar_happy.png')
+        # self.avatar = avatar
+        # Label(self.avatarFrame, image=avatar).grid()
+
+
+# TODO mic input
+# def get_audio():
+#     r = sr.Recognizer()
+#     with sr.Microphone() as source:
+#         audio = r.listen(source)
+#         said = ""
+#         try:
+#             said = r.recognize_google(audio)
+#             print(said)
+#         except Exception as e:
+#             print("Exception: " + str(e))
+#     return said
 
 
 warnings.filterwarnings('ignore')
@@ -154,7 +184,7 @@ with open('intents.json') as json_data:
 words = []
 classes = []
 documents = []
-ignore_words = ['?', "'m", "'re", "'s", ')', ',', '.', ':']  # STOPWORDS
+ignore_words = ['?', "'m", "'re", "'s", ',', '.', ':']  # STOPWORDS
 
 # pentru fiecare fraza din sabloanele corespunzatoare unei intentii
 for intent in intents['intents']:
@@ -213,16 +243,18 @@ ops.reset_default_graph()  # resetam starea engine-ului TensorFlow
 # definim reteaua
 net = tflearn.input_data(shape=[None, len(train_x[0])])  # toti vectorii de bag-of-words au aceasta dimensiune
 net = tflearn.fully_connected(net, 8)  # strat feed-forward ascuns cu 8 noduri
-# net = tflearn.fully_connected(net, 8)  # strat feed-forward ascuns cu 8 noduri
 net = tflearn.fully_connected(net, len(train_y[0]), activation='softmax')  # numarul de noduri output = numarul de clase
 net = tflearn.regression(net)  # folosim acest strat de logistic regression pentru a extrage probabilitatile claselor
 
 # definim modelul final
 model = tflearn.DNN(net, tensorboard_dir='tflearn_logs')
 
-# incepem antrenarea folosind coborarea pe gradient, trecem prin model cate 8 fraze odata (batch size = 8)
-model.fit(train_x, train_y, n_epoch=1000, batch_size=8, show_metric=True)
-model.save('model.tflearn')
+
+def training():
+    # incepem antrenarea folosind coborarea pe gradient, trecem prin model cate 8 fraze odata (batch size)
+    model.fit(train_x, train_y, n_epoch=2000, batch_size=8, show_metric=True)
+    model.save('model.tflearn')
+
 
 pickle.dump({'words': words, 'classes': classes, 'train_x': train_x, 'train_y': train_y}, open("training_data", "wb"))
 
@@ -232,9 +264,6 @@ words = data['words']
 classes = data['classes']
 train_x = data['train_x']
 train_y = data['train_y']
-
-with open('intents.json') as json_data:
-    intents = json.load(json_data)
 
 # incarcam weight-urile salvate pentru cel mai bun model de clasificare
 model.load('model.tflearn')
@@ -261,7 +290,7 @@ def bow(sentence, words):
     return np.array(bag)
 
 
-ERROR_THRESHOLD = 0.4
+ERROR_THRESHOLD = 0.6
 
 
 def classify(sentence):
@@ -282,7 +311,7 @@ def classify(sentence):
 context = {}
 
 
-def response(sentence, userID='123', show_details=False):
+def response(sentence, userID='123'):
     results = classify(sentence)
 
     # daca avem macar o intentie valida, o procesam pe cea cu probabilitate maxima
@@ -291,16 +320,29 @@ def response(sentence, userID='123', show_details=False):
             for i in intents['intents']:
                 # cautam in dictionarul de intentii tagul returnat
                 if i['tag'] == results[0][0]:
-                    if ('context_filter' not in i or
-                            (userID in context and 'context_filter' in i and i['context_filter'] == context[userID])):
+                    if 'context_filter' not in i or (userID in context and 'context_filter' in i and i['context_filter']
+                                                     == context[userID]):
                         # daca intentia curenta actualizeaza contextul
                         if 'context_set' in i:
                             context[userID] = i['context_set']
+
+                        if i['tag'] == "weather":
+                            html = weatherAcces().content
+                            soup = bs4.BeautifulSoup(html, "html.parser")
+                            submission_count_text = soup.find(class_="CurrentConditions--tempValue--3a50n").text
+                            tts = gTTS(text=submission_count_text, lang='en', slow=False)
+                            date_string = datetime.now().strftime("%d%m%Y%H%M%S")
+                            ttsResponse = "tts." + date_string + ".mp3"
+                            tts.save('tts/' + ttsResponse)
+                            mixer.music.load('tts/' + ttsResponse)
+                            mixer.music.play()
+                            return submission_count_text
+
                         # returnam un raspuns aleator corespunzator intentiei
                         botResponse = random.choice(i['responses'])
                         tts = gTTS(text=botResponse, lang='en', slow=False)
                         date_string = datetime.now().strftime("%d%m%Y%H%M%S")
-                        ttsResponse = "tts."+date_string+".mp3"
+                        ttsResponse = "tts." + date_string + ".mp3"
                         tts.save('tts/' + ttsResponse)
                         mixer.music.load('tts/' + ttsResponse)
                         mixer.music.play()
@@ -317,9 +359,18 @@ def response(sentence, userID='123', show_details=False):
     return "Sorry, I can't understand you. :("  # nu a putut fi stabilita o intentie pentru fraza introdusa
 
 
+def weatherAcces():
+    return requests.get(f"https://weather.com/ro-RO/vreme/astazi/l/ROXX0003:1:RO")
+
+
 if __name__ == "__main__":
+    # text = get_audio()
+
+    # training()
+
     # we remove any previous tts files
     directory = 'tts/'
     for f in os.listdir(directory):
         os.remove(os.path.join(directory, f))
+
     g = GUI()

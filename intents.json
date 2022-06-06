@@ -3,28 +3,25 @@
     {
       "tag": "empty",
       "patterns": ["", " "],
-      "responses": ["Did you say something?",  "Are you there?", "Hello?"]
+      "responses": ["Did you say something?", "Are you there?", "Hello?"]
     },
 
     {
       "tag": "greeting",
       "patterns": ["Hi", "Hello", "Good day"],
-      "responses": ["Hello, how are you today?", "Good to see you again. How are you?", "Hi there, how are you?", "Hello there, what's up?"],
-      "context_set": "howareyou"
+      "responses": ["Hello, how are you today?", "Good to see you again. How are you?", "Hi there, how are you?", "Hello there, what's up?"]
     },
 
     {
-      "tag": "greeting_good",
-      "patterns": ["I'm fine", "I'm pretty good", "I'm happy"],
-      "responses": ["I'm very happy to hear that! :)", "Yay, that's great news! :)"],
-      "context_filter": "howareyou"
+      "tag": "feeling_good",
+      "patterns": ["I'm fine", "I'm pretty good", "I'm happy", "fine", "happy"],
+      "responses": ["I'm very happy to hear that! :)", "Yay, that's great news! :)"]
     },
 
     {
-      "tag": "greeting_bad",
-      "patterns": ["Not so good", "I'm not feeling myself today", "I am sadder than ever.", "I feel sad", "I am sad", ":("],
+      "tag": "feeling_bad",
+      "patterns": ["Not so good", "I'm not feeling myself today", "I am sadder than ever.", "I feel sad", "I am sad", ":(", "sad"],
       "responses": ["Oh, I know jokes to make you feel better.", "Do you want me to tell you a joke to feel better?"],
-      "context_filter": "howareyou",
       "context_set": "sayjoke"
     },
 
@@ -43,27 +40,9 @@
     },
 
     {
-      "tag": "question",
-      "patterns": ["How are you", "What's up?"],
-      "responses": ["I'm very happy! :)", "I'm a bot. Of course I feel great! ;)"]
-    },
-
-    {
       "tag": "joke",
       "patterns": ["ok, tell me a joke", "tell me a joke", "do you know any jokes", "please tell me a joke", "joke"],
       "responses": ["What did the wall tell to the other? See you at the corner!", "When Chuck Norris cuts an onion, he doesn't cry, the onion cries!"]
-    },
-
-    {
-      "tag": "goodbye",
-      "patterns": ["Bye", "See you later", "Goodbye", "cya"],
-      "responses": ["See you later!", "Have a nice day!", "Bye! Come back again soon."]
-    },
-
-    {
-      "tag": "thanks",
-      "patterns": ["Thanks", "Thank you", "That's helpful"],
-      "responses": ["Happy to help!", "Any time!", "My pleasure!"]
     },
 
     {
@@ -73,9 +52,43 @@
     },
 
     {
-      "tag": "name",
+      "tag": "thanks",
+      "patterns": ["Thanks", "Thank you", "That's helpful"],
+      "responses": ["Happy to help!", "Any time!", "My pleasure!"]
+    },
+
+    {
+      "tag": "botName",
       "patterns": ["What is your name?", "What's your name?", "Who are you?" ],
       "responses": ["I am Varothex!", "My name is Varothex!"]
+    },
+
+    {
+      "tag": "botFeeling",
+      "patterns": ["How are you", "What's up?"],
+      "responses": ["I'm very happy! :)", "I'm a bot. Of course I feel great! ;)"]
+    },
+
+    {
+      "tag": "botAge",
+      "patterns": ["How old are you?", "What is your age?", "age" ],
+      "responses": ["I am a month old. ;)", "I am very young!"]
+    },
+
+    {
+      "tag": "weather",
+      "patterns": ["weather", "How is the weather gonna be like today?", "Can you tell me the weather for today?"]
+    },
+
+    {
+      "tag": "christmas",
+      "patterns": ["when is christmas", "christmas"]
+    },
+
+    {
+      "tag": "goodbye",
+      "patterns": ["Bye", "See you later", "Goodbye", "cya"],
+      "responses": ["See you later!", "Have a nice day!", "Bye! Come back again soon."]
     }
   ]
 }
