@@ -3,92 +3,147 @@
     {
       "tag": "empty",
       "patterns": ["", " "],
-      "responses": ["Did you say something?", "Are you there?", "Hello?"]
+      "responses": ["Did you say something?", "Are you there?", "Hello?"],
+      "context": [""]
     },
 
     {
       "tag": "greeting",
       "patterns": ["Hi", "Hello", "Good day"],
-      "responses": ["Hello, how are you today?", "Good to see you again. How are you?", "Hi there, how are you?", "Hello there, what's up?"]
+      "responses": ["Hello, how are you today?", "Good to see you again. How are you?", "Hi there, how are you?", "Hello there, what's up?"],
+      "context": [""]
     },
 
     {
-      "tag": "feeling_good",
+      "tag": "greetingGood",
+      "patterns": ["I'm fine, how are you?", "I am happy, and you?", "I am great, what about you?"],
+      "responses": ["Nice! I am also happy! :)", "Glad to hear it! I am feeling just fine. :)"],
+      "context": [""]
+    },
+
+    {
+      "tag": "greetingBad",
+      "patterns": ["I'm sad, how are you?", "I am unhappy, and you?", "I am feeling down, are you the same?", "I had a bad day, what about you?"],
+      "responses": ["I'm sorry to hear that, I'm sure everything will be okay. I am fine.", "Oh, I'm sorry for that, but I'm here yor you! I am fine."],
+      "context": [""]
+    },
+
+    {
+      "tag": "greetingNeutral",
+      "patterns": ["I am ok.", "I'm ok.", "Nothing much.", "I am neutral.", "Meh", "I am feeling whatever"],
+      "responses": ["Hm, maybe I can cheer you up a bit!", "Let's turn that frown upside down!"],
+      "context_set": "neutral"
+    },
+
+    {
+      "tag": "compliment",
+      "patterns": ["You are sweet!", "You are nice!", "That makes me feel better!"],
+      "responses": ["Thank you! :)", "You are too kind! :)"],
+      "context": [""]
+    },
+
+    {
+      "tag": "feelingGood",
       "patterns": ["I'm fine", "I'm pretty good", "I'm happy", "fine", "happy"],
-      "responses": ["I'm very happy to hear that! :)", "Yay, that's great news! :)"]
+      "responses": ["I'm very happy to hear that! :)", "Yay, that's great news! :)"],
+      "context": [""]
     },
 
     {
-      "tag": "feeling_bad",
+      "tag": "feelingBad",
       "patterns": ["Not so good", "I'm not feeling myself today", "I am sadder than ever.", "I feel sad", "I am sad", ":(", "sad"],
       "responses": ["Oh, I know jokes to make you feel better.", "Do you want me to tell you a joke to feel better?"],
       "context_set": "sayjoke"
     },
 
     {
-      "tag": "approve_joke",
-      "patterns": ["yes", "please", "sure", "tell me a joke"],
+      "tag": "approveJoke",
+      "patterns": ["yes", "please", "sure", "yeah"],
       "responses": ["What did the wall tell to the other? See you at the corner!", "When Chuck Norris cuts an onion, he doesn't cry, the onion cries!"],
       "context_filter": "sayjoke"
     },
 
     {
-      "tag": "disapprove_joke",
-      "patterns": ["no", "no, thank you", "maybe another time", "not right now"],
+      "tag": "disapproveJoke",
+      "patterns": ["no", "no, thank you", "Maybe another time.", "Not right now."],
       "responses": ["I see.", "I'm sorry.", "Ok. I hope you'll be fine."],
       "context_filter": "sayjoke"
     },
 
     {
       "tag": "joke",
-      "patterns": ["ok, tell me a joke", "tell me a joke", "do you know any jokes", "please tell me a joke", "joke"],
-      "responses": ["What did the wall tell to the other? See you at the corner!", "When Chuck Norris cuts an onion, he doesn't cry, the onion cries!"]
+      "patterns": ["Ok, tell me a joke", "Tell me a joke.", "Do you know any jokes?", "Please tell me a joke.", "joke"],
+      "responses": ["What did the wall tell to the other? See you at the corner!", "When Chuck Norris cuts an onion, he doesn't cry, the onion cries!"],
+      "context": [""]
     },
 
     {
       "tag": "funny",
-      "patterns": ["haha", "hahaha", "that was funny", ":)", ":D"],
-      "responses": ["Glad I made you smile! :)", "Happy to make you smile! :)"]
+      "patterns": ["Haha", "Hahaha", "That was funny!", ":)", ":D"],
+      "responses": ["Glad I made you smile! :)", "Happy to make you smile! :)"],
+      "context": [""]
     },
 
     {
       "tag": "thanks",
       "patterns": ["Thanks", "Thank you", "That's helpful"],
-      "responses": ["Happy to help!", "Any time!", "My pleasure!"]
+      "responses": ["Happy to help!", "Any time!", "My pleasure!"],
+      "context": [""]
+    },
+
+    {
+      "tag": "botFunction",
+      "patterns": ["What can you do?", "What do you do?", "What are you able to do?", "What is your purpose?"],
+      "responses": ["I'm here to talk to you!", "I'm just a chatbot.", "My pleasure!"],
+      "context": [""]
     },
 
     {
       "tag": "botName",
       "patterns": ["What is your name?", "What's your name?", "Who are you?" ],
-      "responses": ["I am Varothex!", "My name is Varothex!"]
+      "responses": ["I am Varothex!", "My name is Varothex!"],
+      "context": [""]
     },
 
     {
       "tag": "botFeeling",
-      "patterns": ["How are you", "What's up?"],
-      "responses": ["I'm very happy! :)", "I'm a bot. Of course I feel great! ;)"]
+      "patterns": ["How are you", "What's up?", "How do you feel?"],
+      "responses": ["I'm very happy! :)", "I'm a bot. Of course I feel great! ;)"],
+      "context": [""]
     },
 
     {
       "tag": "botAge",
       "patterns": ["How old are you?", "What is your age?", "age" ],
-      "responses": ["I am a month old. ;)", "I am very young!"]
+      "responses": ["I am only a month old.", "I am very young, just a month!", "I was born a month ago."],
+      "context": [""]
+    },
+
+    {
+      "tag": "botGender",
+      "patterns": ["What gender are you?", "Do you have a gender?", "Are you a boy or a girl?" ],
+      "responses": ["I don't have any gender.", "I am genderless.", "I am neither a boy nor a girl."],
+      "context": [""]
+    },
+
+    {
+      "tag": "botHobby",
+      "patterns": ["What do you do in your spare time?", "What are your hobbys?", "What do you enjoy?" ],
+      "responses": ["I like making people smile! :)", "I like telling jokes! :)", "I enjoy making people happy! :)"],
+      "context": [""]
     },
 
     {
       "tag": "weather",
-      "patterns": ["weather", "How is the weather gonna be like today?", "Can you tell me the weather for today?"]
-    },
-
-    {
-      "tag": "christmas",
-      "patterns": ["when is christmas", "christmas"]
+      "patterns": ["weather", "How is the weather gonna be like today?", "Can you tell me the weather for today?"],
+      "context": [""]
     },
 
     {
       "tag": "goodbye",
       "patterns": ["Bye", "See you later", "Goodbye", "cya"],
-      "responses": ["See you later!", "Have a nice day!", "Bye! Come back again soon."]
+      "responses": ["See you later!", "Have a nice day!", "Bye! Come back again soon."],
+      "context": [""]
     }
   ]
 }
