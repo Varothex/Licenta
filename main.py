@@ -16,8 +16,10 @@ from pygame import mixer
 import requests
 import bs4
 from time import *
+
+
 # import PyAudio
-import speech_recognition as sr
+# import speech_recognition as sr
 
 
 class GUI:
@@ -149,24 +151,26 @@ class GUI:
         time = strftime('%H:%M')
         message, feeling = response(self.msg)
         message = time + " Varothex: " + message
+
+        self.avatarFrame.configure(image=self.avatar)
+        self.avatarFrame.image = self.avatar
+
         self.chatWindow.config(state=NORMAL)
         self.chatWindow.insert(END, message + "\n\n")
         self.chatWindow.config(state=DISABLED)
         self.chatWindow.see(END)
 
         # animations
-        if feeling == 'happy':
+        if feeling == "happy":
             self.avatar = PhotoImage(file='avatar_happy.png')
             self.avatarFrame.configure(image=self.avatar)
-            self.avatarFrame.image = self.avatar
-        elif feeling == 'sad':
+        elif feeling == "sad":
             self.avatar = PhotoImage(file='avatar_sad.png')
             self.avatarFrame.configure(image=self.avatar)
-            self.avatarFrame.image = self.avatar
         else:
             self.avatar = PhotoImage(file='avatar.png')
             self.avatarFrame.configure(image=self.avatar)
-            self.avatarFrame.image = self.avatar
+        self.avatarFrame.image = self.avatar
 
 
 # TODO mic input
@@ -333,10 +337,13 @@ def response(sentence, userID='27'):
                         tts.save('tts/' + ttsResponse)
                         mixer.music.load('tts/' + ttsResponse)
                         mixer.music.play()
-                        if i['tag'] == "greetingGood" or "compliment" or "feelingGood" or "approveJoke" or \
-                                "joke" or "funny" or "thanks" or "goodbye":
+
+                        if (i['tag'] == "greetingGood") or (i['tag'] == "compliment") or (i['tag'] == "feelingGood") \
+                                or (i['tag'] == "approveJoke") or (i['tag'] == "joke") or (i['tag'] == "funny") or \
+                                (i['tag'] == "thanks") or (i['tag'] == "goodbye"):
                             return botResponse, 'happy'
-                        elif i['tag'] == "empty" or "greetingBad" or "feelingBad" or "disapproveJoke":
+                        if (i['tag'] == "empty") or (i['tag'] == "greetingBad") or (i['tag'] == "feelingBad") or \
+                                (i['tag'] == "disapproveJoke"):
                             return botResponse, 'sad'
                         return botResponse, 'neutral'
 

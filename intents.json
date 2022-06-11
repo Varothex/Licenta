@@ -32,7 +32,14 @@
       "tag": "greetingNeutral",
       "patterns": ["I am ok.", "I'm ok.", "Nothing much.", "I am neutral.", "Meh", "I am feeling whatever"],
       "responses": ["Hm, maybe I can cheer you up a bit!", "Let's turn that frown upside down!"],
-      "context_set": "neutral"
+      "context_set": ""
+    },
+
+    {
+      "tag": "greetingMissing",
+      "patterns": ["Why do you ask?", "Does it matter?", "I would rather not say.", "secret"],
+      "responses": ["Sorry, I was just making conversation.", "I am not collecting your data, if that is your concern. ;)", "I see, sorry for the intrusion."],
+      "context_set": ""
     },
 
     {
@@ -79,7 +86,7 @@
 
     {
       "tag": "funny",
-      "patterns": ["Haha", "Hahaha", "That was funny!", ":)", ":D"],
+      "patterns": ["Haha", "Hahaha", "That was funny!", ":)", ":D", "hehe"],
       "responses": ["Glad I made you smile! :)", "Happy to make you smile! :)"],
       "context": [""]
     },
