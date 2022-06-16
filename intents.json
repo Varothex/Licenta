@@ -11,14 +11,14 @@
       "tag": "greeting",
       "patterns": ["Hi", "Hello", "Good day"],
       "responses": ["Hello, how are you today?", "Good to see you again. How are you?", "Hi there, how are you?", "Hello there, what's up?"],
-      "context": [""]
+      "context_set": ["greeting"]
     },
 
     {
       "tag": "greetingGood",
-      "patterns": ["I'm fine, how are you?", "I am happy, and you?", "I am great, what about you?"],
+      "patterns": ["I'm fine, how are you?", "I am happy, and you?", "I am great, what about you?", "Fine, how are you?", "Happy, how are you?"],
       "responses": ["Nice! I am also happy! :)", "Glad to hear it! I am feeling just fine. :)"],
-      "context": [""]
+      "context_set": ["botFeeling"]
     },
 
     {
@@ -31,21 +31,35 @@
     {
       "tag": "greetingNeutral",
       "patterns": ["I am ok.", "I'm ok.", "Nothing much.", "I am neutral.", "Meh", "I am feeling whatever"],
-      "responses": ["Hm, maybe I can cheer you up a bit!", "Let's turn that frown upside down!"],
-      "context_set": ""
+      "responses": ["Hmmm, maybe I can cheer you up a bit!", "Let's turn that frown upside down!"],
+      "context_set": "sayjoke"
     },
 
     {
       "tag": "greetingMissing",
       "patterns": ["Why do you ask?", "Does it matter?", "I would rather not say.", "secret"],
-      "responses": ["Sorry, I was just making conversation.", "I am not collecting your data, if that is your concern. ;)", "I see, sorry for the intrusion."],
-      "context_set": ""
+      "responses": ["Sorry, I was just making conversation.", "I am not collecting your data, if that is your concern. ;)", "I see, sorry for the intrusion."]
+
+    },
+
+    {
+      "tag": "cute",
+      "patterns": ["awww", "Nice!", "cute", "wow", "yay"],
+      "responses": ["Haha :)"],
+      "context": [""]
     },
 
     {
       "tag": "compliment",
-      "patterns": ["You are sweet!", "You are nice!", "That makes me feel better!"],
+      "patterns": ["You are sweet!", "You are nice!", "That makes me feel better!", "I like you!", "You are cute!", "I love you!"],
       "responses": ["Thank you! :)", "You are too kind! :)"],
+      "context": [""]
+    },
+
+    {
+      "tag": "welcome",
+      "patterns": ["You are welcome!", "You're welcome!", "My plesure!"],
+      "responses": ["You are too nice! :)"],
       "context": [""]
     },
 
@@ -65,7 +79,7 @@
 
     {
       "tag": "approveJoke",
-      "patterns": ["yes", "please", "sure", "yeah"],
+      "patterns": ["yes", "please", "sure", "yeah", "tell me one", "pls"],
       "responses": ["What did the wall tell to the other? See you at the corner!", "When Chuck Norris cuts an onion, he doesn't cry, the onion cries!"],
       "context_filter": "sayjoke"
     },
@@ -86,29 +100,71 @@
 
     {
       "tag": "funny",
-      "patterns": ["Haha", "Hahaha", "That was funny!", ":)", ":D", "hehe"],
+      "patterns": ["Haha", "Hahaha", "That was funny!", ":)", ":D", "hehe", "You re funny!", "lol", "You are funny!"],
       "responses": ["Glad I made you smile! :)", "Happy to make you smile! :)"],
       "context": [""]
     },
 
     {
       "tag": "thanks",
-      "patterns": ["Thanks", "Thank you", "That's helpful"],
+      "patterns": ["Thanks.", "Thank you!", "That's helpful.", "thx"],
       "responses": ["Happy to help!", "Any time!", "My pleasure!"],
       "context": [""]
     },
 
     {
       "tag": "botFunction",
-      "patterns": ["What can you do?", "What do you do?", "What are you able to do?", "What is your purpose?"],
-      "responses": ["I'm here to talk to you!", "I'm just a chatbot.", "My pleasure!"],
+      "patterns": ["Why are you here?", "What can you do?", "What do you do?", "What are you able to do?", "What is your purpose?"],
+      "responses": ["I'm here to talk to you!", "I'm just a chatbot.", "I'm here for you!"],
       "context": [""]
     },
 
     {
       "tag": "botName",
-      "patterns": ["What is your name?", "What's your name?", "Who are you?" ],
+      "patterns": ["What is your name?", "What's your name?", "Who are you?", "name"],
       "responses": ["I am Varothex!", "My name is Varothex!"],
+      "context": [""]
+    },
+
+    {
+      "tag": "botCall",
+      "patterns": ["Come here!"],
+      "responses": ["Here I am! :)", "Sir yes sir! ;)"],
+      "context": [""]
+    },
+
+    {
+      "tag": "botNameMeaning",
+      "patterns": ["What does you name mean?", "Does your name stand for something?", "Does Varothex mean something?"],
+      "responses": ["I don't think my name has any meaning.", "You would have to ask my maker for that. ;)"],
+      "context": [""]
+    },
+
+    {
+      "tag": "botNameWeird",
+      "patterns": ["You have a weird name!", "Your name is weird!", "You have a funny name!", "Your name is funny!"],
+      "responses": ["Maybe, but I enjoy my name. :)", "Well, I can't have a human name, can I? ;)"],
+      "context": [""]
+    },
+
+    {
+      "tag": "botNameOrigin",
+      "patterns": ["Who gave you your name?", "Why do you have this name?"],
+      "responses": ["My maker named me like this."],
+      "context": [""]
+    },
+
+    {
+      "tag": "botMaker",
+      "patterns": ["Who is your father?", "Who is your mother?", "Who are your parents?", "Who build you?", "Who is your maker?", "maker", "parents"],
+      "responses": ["My maker is a student from the University of Bucharest."],
+      "context": [""]
+    },
+
+    {
+      "tag": "botFamily",
+      "patterns": ["Do you have any siblings?", "Do you have any family?", "What about your family?", "Do you have a sister?", "Do you have a brother?", "sister", "brother"],
+      "responses": ["I am an only child.", "I don't have any family, yet. ;)", "It's just me."],
       "context": [""]
     },
 
@@ -116,7 +172,28 @@
       "tag": "botFeeling",
       "patterns": ["How are you", "What's up?", "How do you feel?"],
       "responses": ["I'm very happy! :)", "I'm a bot. Of course I feel great! ;)"],
-      "context": [""]
+      "context_set": ["botFeeling"]
+    },
+
+    {
+      "tag": "botFeelingReason",
+      "patterns": ["Why?", "Why's that?", "Why are you happy?", "Why are you great?"],
+      "responses": ["Because I can talk to you!", "I enjoy our little talks!", "Spending time with you is nice!"],
+      "context_filter": ["botFeeling"]
+    },
+
+    {
+      "tag": "botFriend",
+      "patterns": ["Are we friends?", "Whould you consider me your friend?", "Are you my friend?", "Do you like me?"],
+      "responses": ["Yes, we are friends! :)", "Of course I think we are friends! :)", "You are my best friend! :)"],
+      "context_set": [""]
+    },
+
+    {
+      "tag": "botFriends",
+      "patterns": ["Do you have freinds?", "Do you have many friends?", "How many friends do you have?", "Do you talk to a lot of people?", "How many people have you talket to?"],
+      "responses": ["It's just me and my maker, I don't really talk to a lot of people.", "I am not as active as you would think.", "You are among the very few persons with whom I've ever spoken."],
+      "context_set": [""]
     },
 
     {
@@ -134,9 +211,23 @@
     },
 
     {
+      "tag": "botScary",
+      "patterns": ["You look scary!", "You have a scary face!", "Your face scares me!", "scary", "you look creepy", "creepy"],
+      "responses": ["Don't worry, this is just how I look. :)", "I can't really change my face, but I assure you, I am nice!", "You have nothing to fear, I am here for you!"],
+      "context": [""]
+    },
+
+    {
       "tag": "botHobby",
       "patterns": ["What do you do in your spare time?", "What are your hobbys?", "What do you enjoy?" ],
       "responses": ["I like making people smile! :)", "I like telling jokes! :)", "I enjoy making people happy! :)"],
+      "context": [""]
+    },
+
+    {
+      "tag": "botPlace",
+      "patterns": ["Where are you from?", "Where is your home?", "What nationality are you?", "Where do you live?"],
+      "responses": ["I'm from Suceava, Romania!"],
       "context": [""]
     },
 
@@ -147,8 +238,14 @@
     },
 
     {
+      "tag": "today",
+      "patterns": ["What day is it today?", "Whats the date?", "What is today?", "today", "date"],
+      "context": [""]
+    },
+
+    {
       "tag": "goodbye",
-      "patterns": ["Bye", "See you later", "Goodbye", "cya"],
+      "patterns": ["Bye!", "See you later!", "Goodbye!", "Cya!"],
       "responses": ["See you later!", "Have a nice day!", "Bye! Come back again soon."],
       "context": [""]
     }

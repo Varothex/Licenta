@@ -5,10 +5,10 @@ import nltk
 from django.utils.datetime_safe import datetime
 from nltk.stem.lancaster import LancasterStemmer
 import numpy as np
+from tensorflow.python.framework import ops
 import tflearn
 import random
 import json
-from tensorflow.python.framework import ops
 import pickle
 from gtts import gTTS
 import os
@@ -16,10 +16,8 @@ from pygame import mixer
 import requests
 import bs4
 from time import *
-
-
-# import PyAudio
-# import speech_recognition as sr
+import datetime as dt
+import transformers
 
 
 class GUI:
@@ -29,21 +27,17 @@ class GUI:
 
         # login window
         self.login = Toplevel()
-
-        # set the title
         self.login.title("Login")
         self.login.resizable(width=False, height=False)
         self.login.configure(width=400, height=300)
 
-        # create a Label
         self.pls = Label(self.login, text="What should I call you?", justify=CENTER, font="Roboto 14 bold")
         self.pls.place(relheight=0.15, relx=0.2, rely=0.07)
 
-        # create a Label
         self.labelName = Label(self.login, text="Name: ", font="Roboto 12")
         self.labelName.place(relheight=0.2, relx=0.1, rely=0.2)
 
-        # create a entry box for tyoing the message
+        # entry box for name
         self.entryName = Entry(self.login, font="Roboto 14")
         self.entryName.place(relwidth=0.4, relheight=0.12, relx=0.35, rely=0.2)
 
@@ -75,15 +69,21 @@ class GUI:
 
         width = 0.7
 
+        # chat window
+        self.chatWindow = Text(self.Window, width=20, height=2, bg="#17202A", fg="#EAECEE", font="Roboto 14", padx=5,
+                               pady=5)
+        self.chatWindow.place(relheight=0.825, relwidth=width)
+
         # avatar
         self.avatar = PhotoImage(file='avatar.png')  # need a reference to the image or it gets garbage collected
         self.avatarFrame = Label(self.Window, image=self.avatar)
         self.avatarFrame.place(relx=width, rely=0)
 
-        # chat window
-        self.chatWindow = Text(self.Window, width=20, height=2, bg="#17202A", fg="#EAECEE", font="Roboto 14", padx=5,
-                               pady=5)
-        self.chatWindow.place(relheight=0.825, relwidth=width)
+        # settings button
+        self.buttonSettings = Button(self.Window, text="Change Color", font="Roboto 14 bold", width=20,
+                                     bg="#ABB2B9", command=lambda: self.openSettings())
+        self.buttonSettings.place(relx=0.76, rely=0.5)
+        self.chatWindow.config(cursor="arrow")
 
         # scroll bar
         scrollbar = Scrollbar(self.Window)
@@ -172,19 +172,56 @@ class GUI:
             self.avatarFrame.configure(image=self.avatar)
         self.avatarFrame.image = self.avatar
 
+    def openSettings(self):
+        self.settings = Toplevel()
+        self.settings.title("Color Settings")
+        self.settings.resizable(width=False, height=False)
+        self.settings.configure(width=400, height=300)
 
-# TODO mic input
-# def get_audio():
-#     r = sr.Recognizer()
-#     with sr.Microphone() as source:
-#         audio = r.listen(source)
-#         said = ""
-#         try:
-#             said = r.recognize_google(audio)
-#             print(said)
-#         except Exception as e:
-#             print("Exception: " + str(e))
-#     return said
+        self.buttonSettingsRed = Button(self.settings, text="Red Backround", font="Roboto 14 bold", width=20,
+                                        bg="#ABB2B9", command=lambda: self.applySettings('red'))
+        self.buttonSettingsRed.place(relx=0.22, rely=0.12)
+        self.chatWindow.config(cursor="arrow")
+
+        self.buttonSettingsYellow = Button(self.settings, text="Yellow Backround", font="Roboto 14 bold", width=20,
+                                           bg="#ABB2B9", command=lambda: self.applySettings('yellow'))
+        self.buttonSettingsYellow.place(relx=0.22, rely=0.32)
+        self.chatWindow.config(cursor="arrow")
+
+        self.buttonSettingsGreen = Button(self.settings, text="Green Backround", font="Roboto 14 bold", width=20,
+                                          bg="#ABB2B9", command=lambda: self.applySettings('green'))
+        self.buttonSettingsGreen.place(relx=0.22, rely=0.52)
+        self.chatWindow.config(cursor="arrow")
+
+        self.buttonSettingsDefault = Button(self.settings, text="Default Backround", font="Roboto 14 bold", width=20,
+                                            bg="#ABB2B9", command=lambda: self.applySettings('blue'))
+        self.buttonSettingsDefault.place(relx=0.22, rely=0.72)
+        self.chatWindow.config(cursor="arrow")
+
+    def applySettings(self, color):
+        if color == 'red':
+            self.chatWindow.configure(bg="#b03333")  # roșu
+            self.Window.configure(bg="#b03333")
+            self.textbox.configure(bg="#b03333")
+            self.settings.destroy()
+            return
+        elif color == 'yellow':
+            self.chatWindow.configure(bg="#757523")  # galben
+            self.Window.configure(bg="#757523")
+            self.textbox.configure(bg="#757523")
+            self.settings.destroy()
+            return
+        elif color == 'green':
+            self.chatWindow.configure(bg="#19542e")  # verde
+            self.Window.configure(bg="#19542e")
+            self.textbox.configure(bg="#19542e")
+            self.settings.destroy()
+            return
+        self.chatWindow.configure(bg="#17202A")  # albastru
+        self.Window.configure(bg="#17202A")
+        self.textbox.configure(bg="#2C3E50")
+        self.settings.destroy()
+        return
 
 
 warnings.filterwarnings('ignore')
@@ -195,31 +232,31 @@ with open('intents.json') as json_data:
 
 # tokenizing words
 words = []
-classes = []
-documents = []
+tags = []
+wordTag = []
 ignore_words = ['?', "'", ',', '.', '!']  # STOPWORDS
 
 for intent in intents['intents']:
     for pattern in intent['patterns']:
         w = nltk.word_tokenize(pattern)
         words.extend(w)  # adaugam cuvintele la o lista globala cu toate cuvintele din texte
-        documents.append((w, intent['tag']))  # adaugam textul tokenizat la multimea de documente
-        if intent['tag'] not in classes:  # adaugam clasa (tipul de intentie) la lista de clase existente
-            classes.append(intent['tag'])
+        wordTag.append((w, intent['tag']))  # adaugam textul tokenizat la multimea de documente
+        if intent['tag'] not in tags:  # adaugam clasa (tipul de intentie) la lista de clase existente
+            tags.append(intent['tag'])
 
 # aplicam stemming si lowercasing pentru fiecare cuvant intalnit, ignoram stopwords
 words = [stemmer.stem(w.lower()) for w in words if w not in ignore_words]
 words = sorted(list(set(words)))  # eliminam duplciate
-classes = sorted(list(set(classes)))
+tags = sorted(list(set(tags)))
 
 # construim datele de antrenare
 training = []
 output = []
 output_empty = [0] * len(
-    classes)  # un vector de 0 de lungime egala cu numarul de clase (vom folosi reprezentarea one-hot a claselor)
+    tags)  # un vector de 0 de lungime egala cu numarul de clase (vom folosi reprezentarea one-hot a claselor)
 
-for doc in documents:  # bag of words pentru fiecare fraza
-    bag = []
+for doc in wordTag:
+    bag = []  # bag of words pentru fiecare fraza
 
     pattern_words = doc[0]  # lista de tokeni pentru fraza curenta
     pattern_words = [stemmer.stem(word.lower()) for word in pattern_words]
@@ -228,7 +265,7 @@ for doc in documents:  # bag of words pentru fiecare fraza
         bag.append(1) if w in pattern_words else bag.append(0)
 
     output_row = list(output_empty)
-    output_row[classes.index(
+    output_row[tags.index(
         doc[1])] = 1  # output este '1' pentru tagul corespunzator frazei si '0' pentru celelalte (one-hot)
 
     training.append([bag, output_row])
@@ -243,22 +280,22 @@ train_y = list(training[:, 1])  # etichete/labels (ce dorim sa returneze modelul
 ops.reset_default_graph()  # resetam starea engine-ului TensorFlow
 
 net = tflearn.input_data(shape=[None, len(train_x[0])])  # toti vectorii de bag-of-words au aceasta dimensiune
-net = tflearn.fully_connected(net, 64)  # , activation='ReLu'
-net = tflearn.fully_connected(net, 32)
+net = tflearn.fully_connected(net, 64, activation='ReLu')
+net = tflearn.fully_connected(net, 32, activation='ReLu')
 net = tflearn.fully_connected(net, len(train_y[0]), activation='softmax')  # numarul de noduri output = numarul de clase
 net = tflearn.regression(net)  # folosim acest strat de logistic regression pentru a extrage probabilitatile claselor
 
 model = tflearn.DNN(net, tensorboard_dir='tflearn_logs', tensorboard_verbose=3)  # definim modelul final
-model.fit(train_x, train_y, n_epoch=100, batch_size=8,
+model.fit(train_x, train_y, n_epoch=60, batch_size=8,
           show_metric=True)  # incepem antrenarea folosind coborarea pe gradient, trecem prin model cate 8 fraze odata
 model.save('model.tflearn')
 
-pickle.dump({'words': words, 'classes': classes, 'train_x': train_x, 'train_y': train_y}, open("training_data", "wb"))
+pickle.dump({'words': words, 'tags': tags, 'train_x': train_x, 'train_y': train_y}, open("training_data", "wb"))
 
-# testing
+# the bot
 data = pickle.load(open("training_data", "rb"))
 words = data['words']
-classes = data['classes']
+tags = data['tags']
 train_x = data['train_x']
 train_y = data['train_y']
 
@@ -285,7 +322,7 @@ def bow(sentence, words):
     return np.array(bag)
 
 
-ERROR_THRESHOLD = 0.4
+ERROR_THRESHOLD = 0.7
 
 
 def classify(sentence):
@@ -295,7 +332,7 @@ def classify(sentence):
     return_list = []
 
     for r in results:
-        return_list.append((classes[r[0]], r[1]))
+        return_list.append((tags[r[0]], r[1]))
 
     return return_list  # return perechi (intentie, probabilitate)
 
@@ -330,6 +367,17 @@ def response(sentence, userID='27'):
                             mixer.music.play()
                             return submission_count_text, 'neutral'
 
+                        if i['tag'] == "today":
+                            date = dt.datetime.now()
+                            date = str(date)
+                            tts = gTTS(text=date, lang='en', slow=False)
+                            date_string = datetime.now().strftime("%d%m%Y%H%M%S")
+                            ttsResponse = "tts." + date_string + ".mp3"
+                            tts.save('tts/' + ttsResponse)
+                            mixer.music.load('tts/' + ttsResponse)
+                            mixer.music.play()
+                            return date, 'neutral'
+
                         botResponse = random.choice(i['responses'])  # returnam un raspuns corespunzator intentiei
                         tts = gTTS(text=botResponse, lang='en', slow=False)
                         date_string = datetime.now().strftime("%d%m%Y%H%M%S")
@@ -340,7 +388,8 @@ def response(sentence, userID='27'):
 
                         if (i['tag'] == "greetingGood") or (i['tag'] == "compliment") or (i['tag'] == "feelingGood") \
                                 or (i['tag'] == "approveJoke") or (i['tag'] == "joke") or (i['tag'] == "funny") or \
-                                (i['tag'] == "thanks") or (i['tag'] == "goodbye"):
+                                (i['tag'] == "thanks") or (i['tag'] == "goodbye") or (i['tag'] == "botScarry") or \
+                                (i['tag'] == "botFriend") or (i['tag'] == "cute"):
                             return botResponse, 'happy'
                         if (i['tag'] == "empty") or (i['tag'] == "greetingBad") or (i['tag'] == "feelingBad") or \
                                 (i['tag'] == "disapproveJoke"):
@@ -351,10 +400,23 @@ def response(sentence, userID='27'):
 
     # myobj = gTTS(text="Sorry, I can't understand you. :(", lang='en', slow=False)
     # myobj.save("notUnderstand.mp3")
-    notUnderstand = 'notUnderstand.mp3'
-    mixer.music.load(notUnderstand)
+    # notUnderstand = 'notUnderstand.mp3'
+    # mixer.music.load(notUnderstand)
+    # mixer.music.play()
+    # return "Sorry, I can't understand you. :(", 'sad'  # nu a putut fi stabilita o intentie pentru fraza introdusa
+
+    chat = nlp(transformers.Conversation(sentence), pad_token_id=50256)
+    res = str(chat)
+    res = res[res.find("bot >> ") + 6:].strip()
+
+    tts = gTTS(text=res, lang='en', slow=False)
+    date_string = datetime.now().strftime("%d%m%Y%H%M%S")
+    ttsResponse = "tts." + date_string + ".mp3"
+    tts.save('tts/' + ttsResponse)
+    mixer.music.load('tts/' + ttsResponse)
     mixer.music.play()
-    return "Sorry, I can't understand you. :(", 'sad'  # nu a putut fi stabilita o intentie pentru fraza introdusa
+
+    return res, 'neutral'
 
 
 def weatherAcces():
@@ -362,7 +424,9 @@ def weatherAcces():
 
 
 if __name__ == "__main__":
-    # text = get_audio()
+
+    nlp = transformers.pipeline("conversational", model="microsoft/DialoGPT-medium")
+    os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
     # we remove any previous tts files
     directory = 'tts/'
