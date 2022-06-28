@@ -24,12 +24,16 @@ class GUI:
     def __init__(self):
         self.Window = Tk()
         self.Window.withdraw()
+        self.screen_width = self.Window.winfo_screenwidth()
+        self.screen_height = self.Window.winfo_screenheight()
 
         # login window
         self.login = Toplevel()
         self.login.title("Login")
+        login_width, login_height = 400, 300
         self.login.resizable(width=False, height=False)
-        self.login.configure(width=400, height=300)
+        self.login.configure(width=login_width, height=login_height)
+        self.login.geometry(f'{login_width}x{login_height}+{int((self.screen_width - login_width)/2)}+{int((self.screen_height - login_height)/2)}')
 
         self.pls = Label(self.login, text="What should I call you?", justify=CENTER, font="Roboto 14 bold")
         self.pls.place(relheight=0.15, relx=0.2, rely=0.07)
@@ -64,8 +68,10 @@ class GUI:
 
         self.Window.deiconify()
         self.Window.title("Varothex")
+        Window_width, Window_height = 1200, 700
         self.Window.resizable(width=False, height=False)
-        self.Window.configure(width=1200, height=700, bg="#17202A")
+        self.Window.configure(width=Window_width, height=Window_height, bg="#17202A")
+        self.Window.geometry(f'{Window_width}x{Window_height}+{int((self.screen_width - Window_width)/2)}+{int((self.screen_height - Window_height)/2)}')
 
         width = 0.7
 
@@ -80,7 +86,7 @@ class GUI:
         self.avatarFrame.place(relx=width, rely=0)
 
         # settings button
-        self.buttonSettings = Button(self.Window, text="Change Color", font="Roboto 14 bold", width=20,
+        self.buttonSettings = Button(self.Window, text="Settings", font="Roboto 14 bold", width=20,
                                      bg="#ABB2B9", command=lambda: self.openSettings())
         self.buttonSettings.place(relx=0.76, rely=0.5)
         self.chatWindow.config(cursor="arrow")
@@ -167,9 +173,17 @@ class GUI:
         elif feeling == "sad":
             self.avatar = PhotoImage(file='avatar_sad.png')
             self.avatarFrame.configure(image=self.avatar)
+        elif feeling == "wink":
+            self.avatar = PhotoImage(file='avatar_wink.png')
+            self.avatarFrame.configure(image=self.avatar)
+        elif feeling == "wow":
+            self.avatar = PhotoImage(file='avatar_wow.png')
+            self.avatarFrame.configure(image=self.avatar)
         else:
             self.avatar = PhotoImage(file='avatar.png')
             self.avatarFrame.configure(image=self.avatar)
+            if feeling == "exit":
+                self.Window.after(2000, lambda: self.Window.destroy())
         self.avatarFrame.image = self.avatar
 
     def openSettings(self):
@@ -178,23 +192,19 @@ class GUI:
         self.settings.resizable(width=False, height=False)
         self.settings.configure(width=400, height=300)
 
-        self.buttonSettingsRed = Button(self.settings, text="Red Backround", font="Roboto 14 bold", width=20,
-                                        bg="#ABB2B9", command=lambda: self.applySettings('red'))
+        self.buttonSettingsRed = Button(self.settings, text="Red Backround", font="Roboto 14 bold", width=20, bg="#ABB2B9", command=lambda: self.applySettings('red'))
         self.buttonSettingsRed.place(relx=0.22, rely=0.12)
         self.chatWindow.config(cursor="arrow")
 
-        self.buttonSettingsYellow = Button(self.settings, text="Yellow Backround", font="Roboto 14 bold", width=20,
-                                           bg="#ABB2B9", command=lambda: self.applySettings('yellow'))
+        self.buttonSettingsYellow = Button(self.settings, text="Yellow Backround", font="Roboto 14 bold", width=20, bg="#ABB2B9", command=lambda: self.applySettings('yellow'))
         self.buttonSettingsYellow.place(relx=0.22, rely=0.32)
         self.chatWindow.config(cursor="arrow")
 
-        self.buttonSettingsGreen = Button(self.settings, text="Green Backround", font="Roboto 14 bold", width=20,
-                                          bg="#ABB2B9", command=lambda: self.applySettings('green'))
+        self.buttonSettingsGreen = Button(self.settings, text="Green Backround", font="Roboto 14 bold", width=20, bg="#ABB2B9", command=lambda: self.applySettings('green'))
         self.buttonSettingsGreen.place(relx=0.22, rely=0.52)
         self.chatWindow.config(cursor="arrow")
 
-        self.buttonSettingsDefault = Button(self.settings, text="Default Backround", font="Roboto 14 bold", width=20,
-                                            bg="#ABB2B9", command=lambda: self.applySettings('blue'))
+        self.buttonSettingsDefault = Button(self.settings, text="Default Backround", font="Roboto 14 bold", width=20, bg="#ABB2B9", command=lambda: self.applySettings('blue'))
         self.buttonSettingsDefault.place(relx=0.22, rely=0.72)
         self.chatWindow.config(cursor="arrow")
 
@@ -286,8 +296,7 @@ net = tflearn.fully_connected(net, len(train_y[0]), activation='softmax')  # num
 net = tflearn.regression(net)  # folosim acest strat de logistic regression pentru a extrage probabilitatile claselor
 
 model = tflearn.DNN(net, tensorboard_dir='tflearn_logs', tensorboard_verbose=3)  # definim modelul final
-model.fit(train_x, train_y, n_epoch=60, batch_size=8,
-          show_metric=True)  # incepem antrenarea folosind coborarea pe gradient, trecem prin model cate 8 fraze odata
+model.fit(train_x, train_y, n_epoch=60, batch_size=8, show_metric=True)  # incepem antrenarea folosind coborarea pe gradient, trecem prin model cate 8 fraze odata
 model.save('model.tflearn')
 
 pickle.dump({'words': words, 'tags': tags, 'train_x': train_x, 'train_y': train_y}, open("training_data", "wb"))
@@ -322,7 +331,7 @@ def bow(sentence, words):
     return np.array(bag)
 
 
-ERROR_THRESHOLD = 0.7
+ERROR_THRESHOLD = 0.6
 
 
 def classify(sentence):
@@ -342,18 +351,37 @@ context = {}
 
 
 def response(sentence, userID='27'):
+    if sentence == '' or sentence == ' ':
+        botResponse = random.choice(['Did you say something?', 'Are you there?', 'Hello?'])
+        tts = gTTS(text=botResponse, lang='en', slow=False)
+        date_string = datetime.now().strftime("%d%m%Y%H%M%S")
+        ttsResponse = "tts." + date_string + ".mp3"
+        tts.save('tts/' + ttsResponse)
+        mixer.music.load('tts/' + ttsResponse)
+        mixer.music.play()
+        return botResponse, 'sad'
+
     results = classify(sentence)
 
     if results:  # daca avem macar o intentie valida, o procesam pe cea cu probabilitate maxima
         while results:
             for i in intents['intents']:
                 if i['tag'] == results[0][0]:  # cautam in dictionarul de intentii tagul returnat
-                    if 'context_filter' not in i or (userID in context and 'context_filter' in i and i['context_filter']
-                                                     == context[userID]):
+                    if 'context_filter' not in i or (userID in context and 'context_filter' in i and i['context_filter'] == context[userID]):
                         if 'context_set' in i:  # daca intentia curenta actualizeaza contextul
                             context[userID] = i['context_set']
                         else:
                             context[userID] = {}
+
+                        if i['tag'] == "goodbye":
+                            botResponse = random.choice(i['responses'])
+                            tts = gTTS(text=botResponse, lang='en', slow=False)
+                            date_string = datetime.now().strftime("%d%m%Y%H%M%S")
+                            ttsResponse = "tts." + date_string + ".mp3"
+                            tts.save('tts/' + ttsResponse)
+                            mixer.music.load('tts/' + ttsResponse)
+                            mixer.music.play()
+                            return botResponse, 'exit'
 
                         if i['tag'] == "weather":
                             html = weatherAcces().content
@@ -386,24 +414,17 @@ def response(sentence, userID='27'):
                         mixer.music.load('tts/' + ttsResponse)
                         mixer.music.play()
 
-                        if (i['tag'] == "greetingGood") or (i['tag'] == "compliment") or (i['tag'] == "feelingGood") \
-                                or (i['tag'] == "approveJoke") or (i['tag'] == "joke") or (i['tag'] == "funny") or \
-                                (i['tag'] == "thanks") or (i['tag'] == "goodbye") or (i['tag'] == "botScarry") or \
-                                (i['tag'] == "botFriend") or (i['tag'] == "cute"):
+                        if (i['tag'] == "greetingGood") or (i['tag'] == "compliment") or (i['tag'] == "feelingGood") or (i['tag'] == "approveJoke") or (i['tag'] == "joke") or (i['tag'] == "funny") or (i['tag'] == "thanks") or (i['tag'] == "botNeed") or (i['tag'] == "botFeeling") or (i['tag'] == "botFriend") or (i['tag'] == "cute") or (i['tag'] == "welcome"):
                             return botResponse, 'happy'
-                        if (i['tag'] == "empty") or (i['tag'] == "greetingBad") or (i['tag'] == "feelingBad") or \
-                                (i['tag'] == "disapproveJoke"):
+                        if (i['tag'] == "greetingBad") or (i['tag'] == "feelingBad") or (i['tag'] == "notFunny") or (i['tag'] == "disapproveJoke") or (i['tag'] == "feelingBad") or (i['tag'] == "botAbilityDance") or (i['tag'] == "help"):
                             return botResponse, 'sad'
+                        if (i['tag'] == "greetingStarWars") or (i['tag'] == "greetingMissing") or (i['tag'] == "botCall") or (i['tag'] == "botNameMeaning") or (i['tag'] == "botNameWeird") or (i['tag'] == "botCount") or (i['tag'] == "botScary"):
+                            return botResponse, 'wink'
+                        if i['tag'] == "botSingNegative":
+                            return botResponse, 'wow'
                         return botResponse, 'neutral'
 
             results.pop(0)  # daca nu am putut da un raspuns, trecem la urmatoarea intentie cu probabilitate maxima
-
-    # myobj = gTTS(text="Sorry, I can't understand you. :(", lang='en', slow=False)
-    # myobj.save("notUnderstand.mp3")
-    # notUnderstand = 'notUnderstand.mp3'
-    # mixer.music.load(notUnderstand)
-    # mixer.music.play()
-    # return "Sorry, I can't understand you. :(", 'sad'  # nu a putut fi stabilita o intentie pentru fraza introdusa
 
     chat = nlp(transformers.Conversation(sentence), pad_token_id=50256)
     res = str(chat)
