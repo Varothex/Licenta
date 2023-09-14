@@ -1,2 +1,2 @@
 # Licenta
-The code for my Bachelor Degree in Computer Science project
+The code for my Bachelor Degree in Computer Science project.
